@@ -23,7 +23,7 @@ public class Articulo {
 		this.sMinimo=sMinimo;
 		this.sMaximo=sMaximo;
 		this.precio=precio;
-		setAviso();
+		this.aviso=aviso;
 		
 	}
 	public int getCodigo() {
