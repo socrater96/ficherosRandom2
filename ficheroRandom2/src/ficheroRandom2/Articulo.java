@@ -133,7 +133,7 @@ public class Articulo {
 			this.aviso= 'N';
 	}
 	public String toString() {
-		return "Código: "+codigo+"\tDenomición: "+denominacion+"\tStock mínimo: "+sMinimo+"\tStock máximo: "+sMaximo+"\tStock actual: "+sActual+"\tPrecio: "+precio+"\tAviso: "+aviso;
+		return codigo+"\t"+denominacion+"\t"+sMinimo+"\t"+sMaximo+"\t"+sActual+"\t"+precio+"\t"+aviso;
 	}
 	public void escribirFichero(RandomAccessFile raf) throws IOException {
 		raf.writeInt(codigo);

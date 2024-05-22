@@ -14,41 +14,49 @@ public class FicheroRandom2 {
 		int codigo=0; 
 		Articulo articulo = new Articulo();
 		do {
-			System.out.println("Código del artículo: ");
-		}while(!articulo.setCodigo(in.nextLine()));
-		do {
-			System.out.println("Denominación: ");
-		}while(!articulo.setDenominacion(in.nextLine()));
-		do {
-			System.out.println("Stock mínimo: ");
-		}while(!articulo.setsMinimo(in.nextLine()));
-		do {
-			System.out.println("Stock máximo: ");
-		}while(!articulo.setsMaximo(in.nextLine()));
-		do {
-			System.out.println("Stock actual: ");
-		}while(!articulo.setsActual(in.nextLine()));
-		do {
-			System.out.println("Precio: ");
-		}while(!articulo.setPrecio(in.nextLine()));
-		long posicionArchivo = (long) codigo * tamanho;
-		if(posicionArchivo<raf.length()) {
-			raf.seek(posicionArchivo);
-			if(raf.readInt()==0) {
-				raf.seek(posicionArchivo);
-				articulo.escribirFichero(raf);
+			do {
+				System.out.println("Código del artículo: ");
+			}while(!articulo.setCodigo(in.nextLine()));
+			do {
+				System.out.println("Denominación: ");
+			}while(!articulo.setDenominacion(in.nextLine()));
+			do {
+				System.out.println("Stock mínimo: ");
+			}while(!articulo.setsMinimo(in.nextLine()));
+			do {
+				System.out.println("Stock máximo: ");
+			}while(!articulo.setsMaximo(in.nextLine()));
+			do {
+				System.out.println("Stock actual: ");
+			}while(!articulo.setsActual(in.nextLine()));
+			do {
+				System.out.println("Precio: ");
+			}while(!articulo.setPrecio(in.nextLine()));
+			System.out.println("Confirmar? (s/n)");
+			if(in.nextLine()=="s") {
+				long posicionArchivo = (long) codigo * tamanho;
+				if(posicionArchivo<raf.length()) {
+					raf.seek(posicionArchivo);
+					if(raf.readInt()==0) {
+						raf.seek(posicionArchivo);
+						articulo.escribirFichero(raf);
+					}
+					else
+						System.out.println("Error, posición ocupada");
+				}
+				else {
+					while(posicionArchivo>raf.length()) {
+						articuloVacio.escribirFichero(raf);
+					}
+					raf.seek(posicionArchivo);
+					articulo.escribirFichero(raf);
+				}
 			}
-			else
-				System.out.println("Error, posición ocupada");
-			
-		}
-		else {
-			while(posicionArchivo>raf.length()) {
-				articuloVacio.escribirFichero(raf);
+			else {
+				System.out.println("Cancelado");
 			}
-			raf.seek(posicionArchivo);
-			articulo.escribirFichero(raf);
-		}
+			System.out.println("Agregar otro artículo? (s/n)");
+		}while(in.nextLine()=="s");
 		raf.close();
 	}
 	static void bajas(Scanner in) throws IOException {
@@ -96,37 +104,65 @@ public class FicheroRandom2 {
 			}catch(NumberFormatException e) {
 				System.out.println("Valor no numérico");
 			}
-			try {
+			
 				System.out.println("Límite inferior: ");
+			try {
 				li=Integer.parseInt(in.nextLine());
+				
 			}catch(NumberFormatException e) {
 				System.out.println("Valor no numérico");
 			}
-		}while(ls<li&&(ls*tamanho)>raf.length());
-		while(li<ls) {
-			System.out.println("Codigo\t"+"Denominción\t"+"Stock mínimo\t"+"Stock máximo\t"+"Stock actual\t"+"\tPrecio"+"\tAviso stock");
-			System.out.println("-".repeat(35));
-			do {
-				raf.seek(li*tamanho);
-				if(raf.readInt()!=0) {
-					raf.seek(li*tamanho);
-					Articulo articulo=new Articulo(raf.readInt(),raf.readUTF(),raf.readDouble(),raf.readDouble(),raf.readDouble(),raf.readFloat(),raf.readChar());
-					articulo.escribirFichero(raf);
-					clineas++;
-					li++;
-				}
-				else
-					li++;
-			}while(clineas<4);
-			in.nextLine();
+			if(li*tamanho>raf.length())
+				System.out.println(" El límite inferior está por encima del último artículo");
+		}while(ls<li || (li*tamanho)>raf.length());
+		int pagina=0;
+		while (li < ls) {
+            System.out.println("Codigo\tDenominación\tStock mínimo\tStock máximo\tStock actual\tPrecio\tAviso stock");
+            System.out.println("-".repeat(90));
+            clineas = 0;
+            while (clineas < 4 && li < ls) {
+                try {
+                    raf.seek(li * tamanho);
+                    if (raf.getFilePointer() * tamanho > raf.length()) {
+                        break; // Evitar leer más allá del final del archivo
+                    }
+                    int codigo = raf.readInt();
+                    if (codigo != 0) {
+                        String denominacion = raf.readUTF();
+                        double stockMin = raf.readDouble();
+                        double stockMax = raf.readDouble();
+                        double stockActual = raf.readDouble();
+                        float precio = raf.readFloat();
+                        char avisoStock = raf.readChar();
+
+                        // Crear un objeto Articulo y mostrar sus detalles
+                        Articulo articulo = new Articulo(codigo, denominacion, stockMin, stockMax, stockActual, precio, avisoStock);
+                        System.out.println(articulo);
+                        clineas++;
+                    }
+                } catch (EOFException e) {
+                    break; // Salir del bucle si llegamos al final del archivo
+                }
+            }
+            pagina++;
+            System.out.println("\tPágina " + pagina);
+            System.out.println("Presiona Enter para continuar...");
+            in.nextLine();
+        }
+        raf.close();
+    }
+
+	
+	static void listGeneral() throws IOException {
+		RandomAccessFile raf = new RandomAccessFile("articulos.dat","r");
+		while(raf.length()<raf.getFilePointer()) {
+			
 		}
-		raf.close();
 	}
-	static void listGeneral() {
+	static void listPedidos() {
 		
 	}
-	
-	static void menuVisualizar(Scanner in) throws IOException {
+	static void menuVisualizar(Scanner in) throws IOException, EOFException {
 		int opcion=0;
 		do {
 			System.out.println("1.Listado general");
@@ -145,18 +181,18 @@ public class FicheroRandom2 {
 				listLimites(in);
 				break;
 			case 3:
-				//
+				listPedidos();
 				break;
 			case 4:
 				System.out.println("Volver al menú principal");
 				break;
 		}
-		RandomAccessFile raf = new RandomAccessFile("articulos.dat","r");
 		
 	}
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, EOFException {
 		Scanner in = new Scanner(System.in);
-		RandomAccessFile raf = new RandomAccessFile("articulos.dat", "rw");
+		
+		RandomAccessFile raf = new RandomAccessFile("articulos.dat", "rw");//Se abre este primera vez para asegurarse de que existe y no salga la FileNotFound Exception
 		raf.close();
 		int w=0;
 		while (true) {
