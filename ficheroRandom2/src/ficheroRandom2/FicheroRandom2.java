@@ -17,36 +17,30 @@ public class FicheroRandom2 {
 			do {
 				System.out.println("Código del artículo: ");
 			}while(!articulo.setCodigo(in.nextLine()));
-			do {
-				System.out.println("Denominación: ");
-			}while(!articulo.setDenominacion(in.nextLine()));
-			do {
-				System.out.println("Stock mínimo: ");
-			}while(!articulo.setsMinimo(in.nextLine()));
-			do {
-				System.out.println("Stock máximo: ");
-			}while(!articulo.setsMaximo(in.nextLine()));
-			do {
-				System.out.println("Stock actual: ");
-			}while(!articulo.setsActual(in.nextLine()));
-			do {
-				System.out.println("Precio: ");
-			}while(!articulo.setPrecio(in.nextLine()));
-			System.out.println("Confirmar? (s/n)");
-			if(in.nextLine()=="s") {
-				long posicionArchivo = (long) codigo * tamanho;
-				if(posicionArchivo<raf.length()) {
+			raf.seek(articulo.getCodigo()*tamanho);
+			if(raf.readInt()==0){
+				do {
+					System.out.println("Denominación: ");
+				}while(!articulo.setDenominacion(in.nextLine()));
+				do {
+					System.out.println("Stock mínimo: ");
+				}while(!articulo.setsMinimo(in.nextLine()));
+				do {
+					System.out.println("Stock máximo: ");
+				}while(!articulo.setsMaximo(in.nextLine()));
+				do {
+					System.out.println("Stock actual: ");
+				}while(!articulo.setsActual(in.nextLine()));
+				do {
+					System.out.println("Precio: ");
+				}while(!articulo.setPrecio(in.nextLine()));
+				System.out.println("Confirmar? (s/n)");
+				if(in.nextLine().equals("s")) {
+					long posicionArchivo = (long) articulo.getCodigo() * tamanho;
 					raf.seek(posicionArchivo);
-					if(raf.readInt()==0) {
-						raf.seek(posicionArchivo);
-						articulo.escribirFichero(raf);
-					}
-					else
-						System.out.println("Error, posición ocupada");
-				}
-				else {
 					while(posicionArchivo>raf.length()) {
 						articuloVacio.escribirFichero(raf);
+						posicionArchivo+=;
 					}
 					raf.seek(posicionArchivo);
 					articulo.escribirFichero(raf);
@@ -55,7 +49,8 @@ public class FicheroRandom2 {
 			else {
 				System.out.println("Cancelado");
 			}
-			System.out.println("Agregar otro artículo? (s/n)");
+				System.out.println("Agregar otro artículo? (s/n)");
+				
 		}while(in.nextLine()=="s");
 		raf.close();
 	}
