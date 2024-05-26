@@ -8,10 +8,11 @@ import java.util.Scanner;
 
 public class FicheroRandom2 {
 	static final int tamanho = 4 + (20 + 2) + 8 + 8 + 8 + 4 + 2;
+	static final String cabecera="Codigo\tDenominación\tStock mínimo\tStock máximo\tStock actual\tPrecio\tAviso stock"+"\n"+
+	"-".repeat(1000);
 	static final Articulo articuloVacio= new Articulo(0,"",0,0,0,0,' ');
 	static void altas(Scanner in) throws IOException {
 		RandomAccessFile raf= new RandomAccessFile("articulos.dat", "rw");
-		int codigo=0; 
 		Articulo articulo = new Articulo();
 		do {
 			do {
@@ -38,16 +39,13 @@ public class FicheroRandom2 {
 				if(in.nextLine().equals("s")) {
 					long posicionArchivo = (long) articulo.getCodigo() * tamanho;
 					raf.seek(posicionArchivo);
-					while(posicionArchivo>raf.length()) {
+					while(posicionArchivo>raf.length()) {//Se llena de campos nulos si la posición que se quiere ocupar está fuera de los límites del tamaña del archivo en el momento
 						articuloVacio.escribirFichero(raf);
-						posicionArchivo+=;
 					}
-					raf.seek(posicionArchivo);
 					articulo.escribirFichero(raf);
 				}
-			}
-			else {
-				System.out.println("Cancelado");
+			}else {
+				System.out.println("Cancelado, ya hay un artículo en esa posición");
 			}
 				System.out.println("Agregar otro artículo? (s/n)");
 				
@@ -90,6 +88,7 @@ public class FicheroRandom2 {
 		int li=0;
 		int ls=0;
 		int clineas=0;
+		int pagina=0;
 		RandomAccessFile raf = new RandomAccessFile("articulos.dat","r");
 		do {
 			System.out.println("Limite superior: ");
@@ -110,40 +109,32 @@ public class FicheroRandom2 {
 			if(li*tamanho>raf.length())
 				System.out.println(" El límite inferior está por encima del último artículo");
 		}while(ls<li || (li*tamanho)>raf.length());
-		int pagina=0;
-		while (li < ls) {
-            System.out.println("Codigo\tDenominación\tStock mínimo\tStock máximo\tStock actual\tPrecio\tAviso stock");
-            System.out.println("-".repeat(90));
-            clineas = 0;
-            while (clineas < 4 && li < ls) {
-                try {
-                    raf.seek(li * tamanho);
-                    if (raf.getFilePointer() * tamanho > raf.length()) {
-                        break; // Evitar leer más allá del final del archivo
-                    }
-                    int codigo = raf.readInt();
-                    if (codigo != 0) {
-                        String denominacion = raf.readUTF();
-                        double stockMin = raf.readDouble();
-                        double stockMax = raf.readDouble();
-                        double stockActual = raf.readDouble();
-                        float precio = raf.readFloat();
-                        char avisoStock = raf.readChar();
-
-                        // Crear un objeto Articulo y mostrar sus detalles
-                        Articulo articulo = new Articulo(codigo, denominacion, stockMin, stockMax, stockActual, precio, avisoStock);
-                        System.out.println(articulo);
-                        clineas++;
-                    }
-                } catch (EOFException e) {
-                    break; // Salir del bucle si llegamos al final del archivo
-                }
-            }
-            pagina++;
-            System.out.println("\tPágina " + pagina);
+		for(pagina=1;li<=ls;pagina++){
+			System.out.println(cabecera);
+			clineas=0;
+			for(clineas=0;clineas<4;clineas++) {
+				try {
+					raf.seek(li*tamanho);
+					int codigo=raf.readInt();
+					if(codigo!=0) {
+						String denominacion=raf.readUTF();
+						double stockAct=raf.readDouble();
+						double stockMinimo=raf.readDouble();
+						double stockMaximo=raf.readDouble();
+						float precio=raf.readFloat();
+						char aviso=raf.readChar();
+						Articulo articulo = new Articulo(codigo, denominacion, stockAct, stockMinimo, stockMaximo, precio, aviso);
+						System.out.println(articulo);
+					}
+					
+					
+				}catch(EOFException eofe) {}
+				li++;
+			}
+			System.out.println("\tPágina " + pagina);
             System.out.println("Presiona Enter para continuar...");
             in.nextLine();
-        }
+		}     
         raf.close();
     }
 
